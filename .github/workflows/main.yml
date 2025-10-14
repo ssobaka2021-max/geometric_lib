@@ -9,6 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
+      fail-fast: false
     
     runs-on: ${{ matrix.os }}
     
@@ -21,9 +22,22 @@ jobs:
       with:
         python-version: '3.9'
     
-    - name: Run circle tests
+    - name: Debug test failure
       run: |
-        python -m unittest tests.test_circle -v
+        echo "=== Running circle tests with detailed output ==="
+        python -m unittest tests.test_circle -v || echo "Tests failed with exit code: $?"
+        echo "=== Testing circle functions directly ==="
+        python -c "
+        from circle import area, perimeter
+        print('Area of 5:', area(5))
+        print('Perimeter of 5:', perimeter(5))
+        print('Area of 0:', area(0))
+        try:
+            area(-1)
+            print('ERROR: Negative radius should raise ValueError')
+        except ValueError:
+            print('OK: Negative radius correctly raises ValueError')
+        "
     
     - name: Run all tests
       run: |
