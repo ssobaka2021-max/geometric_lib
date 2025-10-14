@@ -28,7 +28,4 @@ jobs:
     
     - name: Run unit tests
       run: |
-        python -c "import pytest; print('pytest is available')"
-        python -m pytest --version
-        find . -name "*.py" -type f | head -5
-        python -m pytest tests/ -v
+        python -m pytest  
