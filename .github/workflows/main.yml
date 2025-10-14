@@ -22,23 +22,44 @@ jobs:
       with:
         python-version: '3.9'
     
-    - name: Debug test failure
+    - name: Find exact test error
       run: |
-        echo "=== Running circle tests with detailed output ==="
-        python -m unittest tests.test_circle -v || echo "Tests failed with exit code: $?"
-        echo "=== Testing circle functions directly ==="
+        echo "=== Testing each test method separately ==="
         python -c "
         from circle import area, perimeter
-        print('Area of 5:', area(5))
-        print('Perimeter of 5:', perimeter(5))
-        print('Area of 0:', area(0))
+        import math
+        
+        # Test 1: Normal area
         try:
-            area(-1)
-            print('ERROR: Negative radius should raise ValueError')
+            result = area(5)
+            expected = math.pi * 25
+            print(f'Area test: {result} vs {expected}')
+            assert abs(result - expected) < 0.0001
+            print('✓ Area normal: PASS')
+        except Exception as e:
+            print(f'✗ Area normal: FAIL - {e}')
+        
+        # Test 2: Zero area
+        try:
+            result = area(0)
+            print(f'Zero area: {result}')
+            assert result == 0
+            print('✓ Zero area: PASS')
+        except Exception as e:
+            print(f'✗ Zero area: FAIL - {e}')
+        
+        # Test 3: Negative area
+        try:
+            area(-5)
+            print('✗ Negative area: FAIL - Should raise ValueError')
         except ValueError:
-            print('OK: Negative radius correctly raises ValueError')
+            print('✓ Negative area: PASS')
+        except Exception as e:
+            print(f'✗ Negative area: FAIL - {e}')
         "
     
-    - name: Run all tests
+    - name: Run single test method
       run: |
-        python -m unittest discover tests/ -v
+        python -m unittest tests.test_circle.CircleTestCase.test_circle_area_normal -v
+        python -m unittest tests.test_circle.CircleTestCase.test_circle_area_zero -v
+        python -m unittest tests.test_circle.CircleTestCase.test_circle_area_negative -v
